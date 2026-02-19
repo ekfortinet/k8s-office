@@ -1,19 +1,23 @@
 # -----------------------------------------------------------------------------
 # Kubernetes Provider
-# Bruger kubeconfig til at forbinde til klyngen (k8s-master)
+#
+# Når Terraform kører INDE i klyngen (self-hosted runner):
+#   - Sæt kubeconfig_path = "" (tom) → bruger in-cluster service account
+#
+# Når Terraform kører UDENFOR klyngen (lokalt/GitHub-hosted):
+#   - Sæt kubeconfig_path = "~/.kube/config" → bruger kubeconfig fil
 # -----------------------------------------------------------------------------
 provider "kubernetes" {
-  config_path    = var.kubeconfig_path
+  config_path    = var.kubeconfig_path != "" ? var.kubeconfig_path : null
   config_context = var.kubeconfig_context != "" ? var.kubeconfig_context : null
 }
 
 # -----------------------------------------------------------------------------
 # Helm Provider
-# Bruges til at installere Helm charts (f.eks. Cilium, applikationer)
 # -----------------------------------------------------------------------------
 provider "helm" {
   kubernetes {
-    config_path    = var.kubeconfig_path
+    config_path    = var.kubeconfig_path != "" ? var.kubeconfig_path : null
     config_context = var.kubeconfig_context != "" ? var.kubeconfig_context : null
   }
 }
@@ -23,6 +27,6 @@ provider "helm" {
 # Bruges til Cilium CRDs (CiliumEgressGatewayPolicy, etc.)
 # -----------------------------------------------------------------------------
 provider "kubectl" {
-  config_path    = var.kubeconfig_path
+  config_path    = var.kubeconfig_path != "" ? var.kubeconfig_path : null
   config_context = var.kubeconfig_context != "" ? var.kubeconfig_context : null
 }
