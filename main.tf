@@ -24,3 +24,4 @@ resource "kubernetes_namespace" "app_namespaces" {
     ]
   }
 }
+
