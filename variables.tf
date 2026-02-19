@@ -3,9 +3,9 @@
 # -----------------------------------------------------------------------------
 
 variable "kubeconfig_path" {
-  description = "Sti til kubeconfig fil. Tom streng = brug in-cluster service account (til pods i klyngen)"
+  description = "Sti til kubeconfig fil. Self-hosted runner på k8s-master har denne lokalt"
   type        = string
-  default     = ""
+  default     = "~/.kube/config"
 }
 
 variable "kubeconfig_context" {

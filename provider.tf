@@ -1,14 +1,9 @@
 # -----------------------------------------------------------------------------
 # Kubernetes Provider
-#
-# Når Terraform kører INDE i klyngen (self-hosted runner):
-#   - Sæt kubeconfig_path = "" (tom) → bruger in-cluster service account
-#
-# Når Terraform kører UDENFOR klyngen (lokalt/GitHub-hosted):
-#   - Sæt kubeconfig_path = "~/.kube/config" → bruger kubeconfig fil
+# Bruger kubeconfig injiceret via KUBE_CONFIG_DATA GitHub secret
 # -----------------------------------------------------------------------------
 provider "kubernetes" {
-  config_path    = var.kubeconfig_path != "" ? var.kubeconfig_path : null
+  config_path    = var.kubeconfig_path
   config_context = var.kubeconfig_context != "" ? var.kubeconfig_context : null
 }
 
@@ -17,7 +12,7 @@ provider "kubernetes" {
 # -----------------------------------------------------------------------------
 provider "helm" {
   kubernetes {
-    config_path    = var.kubeconfig_path != "" ? var.kubeconfig_path : null
+    config_path    = var.kubeconfig_path
     config_context = var.kubeconfig_context != "" ? var.kubeconfig_context : null
   }
 }
@@ -27,6 +22,6 @@ provider "helm" {
 # Bruges til Cilium CRDs (CiliumEgressGatewayPolicy, etc.)
 # -----------------------------------------------------------------------------
 provider "kubectl" {
-  config_path    = var.kubeconfig_path != "" ? var.kubeconfig_path : null
+  config_path    = var.kubeconfig_path
   config_context = var.kubeconfig_context != "" ? var.kubeconfig_context : null
 }

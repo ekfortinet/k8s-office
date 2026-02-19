@@ -17,11 +17,11 @@ Al infrastruktur er defineret som kode (IaC) og deployes automatisk via CI/CD.
 
 ## 🖥️ Klynge-topologi
 
-| Node        | Rolle  | Hostname      | IP          | Beskrivelse            |
-|-------------|--------|---------------|-------------|------------------------|
-| k8s-master  | Master | k8s-master    | –           | Control plane node     |
-| k8s-slave1  | Worker | k8s-slave1    | 10.200.0.9  | Worker node 1          |
-| k8s-slave2  | Worker | k8s-slave2    | –           | Worker node 2          |
+| Node        | Rolle  | Hostname      | IP          | Beskrivelse                          |
+|-------------|--------|---------------|-------------|--------------------------------------|
+| k8s-master  | Master | k8s-master    | 10.200.0.11 | Control plane + GitHub Actions runner |
+| k8s-slave1  | Worker | k8s-slave1    | 10.200.0.9  | Worker node 1                        |
+| k8s-slave2  | Worker | k8s-slave2    | –           | Worker node 2                        |
 
 - **Kubernetes distribution:** Kubeadm (standard)
 - **Container runtime:** containerd
@@ -222,20 +222,20 @@ egress_gateways = {
 
 ## 🚀 CI/CD Pipeline (GitHub Actions)
 
+### Runner: Self-hosted på k8s-master
+GitHub Actions bruger en **self-hosted runner** installeret på `k8s-master`.
+Runneren har direkte adgang til `~/.kube/config` og kan nå Kubernetes API'et
+på `https://10.200.0.11:6443`.
+
 ### Workflow: Pull Request
 1. Branch oprettes med ændringer
-2. PR mod `main` → GitHub Actions kører `terraform plan`
+2. PR mod `main` → self-hosted runner kører `terraform plan`
 3. Plan-output vises som kommentar på PR
 4. Review + approve
 
 ### Workflow: Merge til Main
-1. PR merges → GitHub Actions kører `terraform apply`
+1. PR merges → self-hosted runner kører `terraform apply`
 2. Ændringer deployes til klyngen
-
-### GitHub Secrets
-| Secret             | Beskrivelse                          |
-|--------------------|--------------------------------------|
-| `KUBE_CONFIG_DATA` | Base64-encoded kubeconfig til klyngen |
 
 ---
 
@@ -264,5 +264,6 @@ egress_gateways = {
 | 2026-02-19 | Tilføjet n8n som eksempel-app med slave1 egress (10.200.0.9)   | AI  |
 | 2026-02-19 | Tilføjet volume/PVC support til application modul              | AI  |
 | 2026-02-19 | Opdateret klynge-topologi med IP-adresser                      | AI  |
+| 2026-02-19 | Skiftet til self-hosted runner (k8s-master: 10.200.0.11)       | AI  |
 
 ---

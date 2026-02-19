@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - "**.tf"
+      - "**.tfvars"
       - ".github/workflows/terraform-apply.yml"
 
 permissions:
@@ -18,7 +19,7 @@ env:
 jobs:
   terraform-apply:
     name: "Terraform Apply"
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     environment: production
 
     steps:
@@ -29,12 +30,6 @@ jobs:
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: ${{ env.TF_VERSION }}
-
-      - name: Configure Kubeconfig
-        run: |
-          mkdir -p $HOME/.kube
-          echo "${{ secrets.KUBE_CONFIG_DATA }}" | base64 -d > $HOME/.kube/config
-          chmod 600 $HOME/.kube/config
 
       - name: Terraform Init
         run: terraform init -input=false
