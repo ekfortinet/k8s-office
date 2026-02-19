@@ -4,7 +4,7 @@
 # -----------------------------------------------------------------------------
 provider "kubernetes" {
   config_path    = var.kubeconfig_path
-  config_context = var.kubeconfig_context
+  config_context = var.kubeconfig_context != "" ? var.kubeconfig_context : null
 }
 
 # -----------------------------------------------------------------------------
@@ -14,7 +14,7 @@ provider "kubernetes" {
 provider "helm" {
   kubernetes {
     config_path    = var.kubeconfig_path
-    config_context = var.kubeconfig_context
+    config_context = var.kubeconfig_context != "" ? var.kubeconfig_context : null
   }
 }
 
@@ -24,5 +24,5 @@ provider "helm" {
 # -----------------------------------------------------------------------------
 provider "kubectl" {
   config_path    = var.kubeconfig_path
-  config_context = var.kubeconfig_context
+  config_context = var.kubeconfig_context != "" ? var.kubeconfig_context : null
 }

@@ -9,9 +9,9 @@ variable "kubeconfig_path" {
 }
 
 variable "kubeconfig_context" {
-  description = "Kubernetes context som skal bruges (svarer til klyngen)"
+  description = "Kubernetes context som skal bruges. Tom streng = brug current-context fra kubeconfig"
   type        = string
-  default     = "kubernetes-admin@kubernetes"
+  default     = ""
 }
 
 variable "cluster_name" {
