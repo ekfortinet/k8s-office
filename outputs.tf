@@ -1,29 +1,19 @@
-# =============================================================================
-# Outputs
-# =============================================================================
-
-output "deployed_applications" {
-  description = "Liste over deployede applikationer"
+output "application_ips" {
+  description = "Oversigt over alle applikationer og deres eksterne IP'er"
   value = {
-    for name, app in var.applications : name => {
-      namespace = app.namespace
-      chart     = app.helm_chart
+    for name, app in local.applications : name => {
+      external_ip = app.external_ip
+      namespace   = app.namespace
+      port        = app.port
+      description = app.description
     }
   }
 }
 
-output "egress_gateway_policies" {
-  description = "Liste over konfigurerede egress gateway policies"
+output "services" {
+  description = "Kubernetes Service navne og IP'er"
   value = {
-    for ns, gw in var.egress_gateways : ns => {
-      egress_node = gw.egress_node_name
-      egress_ip   = gw.egress_node_ip
-      cidrs       = gw.destination_cidrs
-    }
+    for name, svc in kubernetes_service.app_services :
+    name => svc.status[0].load_balancer[0].ingress[0].ip
   }
-}
-
-output "cilium_version" {
-  description = "Installeret Cilium version"
-  value       = helm_release.cilium.version
 }

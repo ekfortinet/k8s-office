@@ -1,27 +1,73 @@
-# =============================================================================
-# K8s Office - Main Orchestration
-# =============================================================================
-# Denne fil opretter namespaces for alle applikationer.
-# Applikationer og egress gateways styres via variables.
-# =============================================================================
-
-# Opret namespaces for hver applikation
-resource "kubernetes_namespace" "app_namespaces" {
-  for_each = var.applications
+resource "kubernetes_deployment" "apps" {
+  for_each   = local.applications
+  depends_on = [kubernetes_namespace.app_namespaces]
 
   metadata {
-    name = each.value.namespace
-
+    name      = each.key
+    namespace = each.value.namespace
     labels = {
-      "managed-by" = "terraform"
-      "app"        = each.key
+      app        = each.key
+      managed-by = "terraform"
     }
   }
 
-  lifecycle {
-    ignore_changes = [
-      metadata[0].annotations,
-    ]
+  spec {
+    replicas = each.value.replicas
+
+    selector {
+      match_labels = {
+        app = each.key
+      }
+    }
+
+    template {
+      metadata {
+        labels = {
+          app = each.key
+        }
+      }
+
+      spec {
+        # Spred pods ud på forskellige noder når replicas > 1
+        dynamic "affinity" {
+          for_each = each.value.replicas > 1 ? [1] : []
+          content {
+            pod_anti_affinity {
+              preferred_during_scheduling_ignored_during_execution {
+                weight = 100
+                pod_affinity_term {
+                  label_selector {
+                    match_labels = {
+                      app = each.key
+                    }
+                  }
+                  topology_key = "kubernetes.io/hostname"
+                }
+              }
+            }
+          }
+        }
+
+        container {
+          name  = each.key
+          image = each.value.image
+
+          port {
+            container_port = each.value.port
+          }
+
+          resources {
+            requests = {
+              cpu    = "100m"
+              memory = "128Mi"
+            }
+            limits = {
+              cpu    = "500m"
+              memory = "512Mi"
+            }
+          }
+        }
+      }
+    }
   }
 }
-

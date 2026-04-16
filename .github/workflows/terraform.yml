@@ -1,0 +1,45 @@
+name: Terraform
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  TF_VERSION: "1.6.0"
+
+jobs:
+  terraform:
+    name: Plan & Apply
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      - name: Terraform Init
+        run: terraform init
+        env:
+          AWS_ACCESS_KEY_ID:     ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+      - name: Terraform Validate
+        run: terraform validate
+
+      - name: Terraform Plan
+        run: terraform plan -out=tfplan
+        env:
+          TF_VAR_kube_context: ${{ secrets.KUBE_CONTEXT }}
+          TF_VAR_bgp_peer_ip:  ${{ secrets.BGP_PEER_IP }}
+
+      - name: Terraform Apply
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: terraform apply tfplan
+        env:
+          TF_VAR_kube_context: ${{ secrets.KUBE_CONTEXT }}
+          TF_VAR_bgp_peer_ip:  ${{ secrets.BGP_PEER_IP }}

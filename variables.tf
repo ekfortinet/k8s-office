@@ -1,67 +1,39 @@
-# =============================================================================
-# Kubeconfig
-# =============================================================================
-
 variable "kubeconfig_path" {
-  description = "Sti til kubeconfig filen på k8s-master"
+  description = "Sti til kubeconfig-fil"
   type        = string
   default     = "~/.kube/config"
 }
 
-# =============================================================================
-# Nodes
-# =============================================================================
-
-variable "nodes" {
-  description = "Map af node-navne til IP-adresser"
-  type        = map(string)
-  default = {
-    "k8s-master" = "10.200.0.11"
-    "k8s-slave1" = "10.200.0.9"
-    "k8s-slave2" = "10.200.0.10"
-  }
+variable "kube_context" {
+  description = "Kubernetes context at anvende"
+  type        = string
 }
 
-# =============================================================================
-# Applications (Source of Truth)
-# =============================================================================
-
-variable "applications" {
-  description = <<-EOT
-    Source of truth for alle applikationer i klyngen.
-    Tilføj/fjern entries for at installere/afinstallere applikationer.
-  EOT
-
-  type = map(object({
-    namespace   = string
-    helm_repo   = string
-    helm_chart  = string
-    chart_version = optional(string)
-    values      = optional(map(string), {})
-    set_values  = optional(list(object({
-      name  = string
-      value = string
-    })), [])
-  }))
-
-  default = {}
+variable "cluster_name" {
+  description = "Navn på Kubernetes-clusteret"
+  type        = string
+  default     = "prod-cluster"
 }
 
-# =============================================================================
-# Egress Gateways (Source of Truth)
-# =============================================================================
+variable "calico_version" {
+  description = "Calico Helm chart version"
+  type        = string
+  default     = "3.27.0"
+}
 
-variable "egress_gateways" {
-  description = <<-EOT
-    Source of truth for Cilium egress gateway policies.
-    Definerer hvilke namespaces der bruger hvilke egress gateways (noder).
-  EOT
+variable "bgp_peer_ip" {
+  description = "IP på upstream BGP router/peer"
+  type        = string
+}
 
-  type = map(object({
-    egress_node_name = string
-    egress_node_ip   = string
-    destination_cidrs = optional(list(string), ["0.0.0.0/0"])
-  }))
+variable "bgp_as_number" {
+  description = "BGP AS-nummer for clusteret"
+  type        = number
+  default     = 64512
+}
 
-  default = {}
+variable "bgp_peer_as_number" {
+  description = "BGP AS-nummer på upstream peer"
+  type        = number
+  default     = 64513
 }
